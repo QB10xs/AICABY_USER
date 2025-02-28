@@ -22,12 +22,21 @@ const ManualBooking: React.FC = () => {
     dropoff: null,
   });
 
-  const handleLocationSelect = (type: 'pickup' | 'dropoff', location: Location) => {
+  const handlePickupSelect = (location: Location) => {
     setLocations(prev => ({
       ...prev,
-      [type]: location
+      pickup: location
     }));
   };
+
+  const handleDropoffSelect = (location: Location) => {
+    setLocations(prev => ({
+      ...prev,
+      dropoff: location
+    }));
+  };
+
+
 
   const handleConfirmBooking = async () => {
     if (!user || !locations.pickup || !locations.dropoff) return;
@@ -96,7 +105,7 @@ const ManualBooking: React.FC = () => {
             <LocationSearch
               type="pickup"
               value={locations.pickup?.address || ''}
-              onSelect={handleLocationSelect}
+              onSelect={handlePickupSelect}
               placeholder="Enter pickup location"
             />
           </div>
@@ -108,7 +117,7 @@ const ManualBooking: React.FC = () => {
             <LocationSearch
               type="dropoff"
               value={locations.dropoff?.address || ''}
-              onSelect={handleLocationSelect}
+              onSelect={handleDropoffSelect}
               placeholder="Enter dropoff location"
             />
           </div>

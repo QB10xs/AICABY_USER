@@ -4,6 +4,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import App from './App';
 import SignIn from './pages/auth/SignIn';
 import SignUp from './pages/auth/SignUp';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import { Documentation } from './pages/docs';
+import DriverLanding from './pages/DriverLanding';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Support from './pages/Support';
@@ -27,8 +30,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <Router>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/driver">
+            <Route index element={<DriverLanding />} />
+            <Route path="signup" element={<SignUp />} />
+            <Route path="docs" element={
+              <ErrorBoundary>
+                <Documentation />
+              </ErrorBoundary>
+            } />
+          </Route>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+
           <Route
             path="/dashboard"
             element={

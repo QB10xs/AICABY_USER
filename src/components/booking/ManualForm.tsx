@@ -12,9 +12,18 @@ import { Location } from '@/types/map';
 import { useAuthStore } from '@/stores/authStore';
 import { Booking } from '@/types/booking';
 
+const locationSchema = z.object({
+  name: z.string(),
+  address: z.string(),
+  coordinates: z.object({
+    lat: z.number(),
+    lng: z.number()
+  })
+});
+
 const bookingSchema = z.object({
-  pickupLocation: z.string().min(1, 'Pickup location is required'),
-  dropoffLocation: z.string().min(1, 'Drop-off location is required'),
+  pickupLocation: locationSchema,
+  dropoffLocation: locationSchema,
   date: z.string().min(1, 'Date is required'),
   time: z.string().min(1, 'Time is required'),
   passengers: z.string().min(1, 'Number of passengers is required'),
@@ -29,8 +38,7 @@ const ManualForm: React.FC = () => {
   const { user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pickupLocation, setPickupLocation] = useState<Location | null>(null);
-  const [dropoffLocation, setDropoffLocation] = useState<Location | null>(null);
+
 
   const {
     register,
@@ -47,25 +55,29 @@ const ManualForm: React.FC = () => {
     },
   });
 
-  const handleLocationSelect = (type: 'pickup' | 'dropoff', location: Location) => {
-    const locationWithName = {
-      ...location,
-      name: location.address // Use address as name if not provided
-    };
-    
-    if (type === 'pickup') {
-      setPickupLocation(locationWithName);
-      setValue('pickupLocation', locationWithName.address);
-    } else {
-      setDropoffLocation(locationWithName);
-      setValue('dropoffLocation', locationWithName.address);
+  const convertMapLocationToBookingLocation = (location: Location): z.infer<typeof locationSchema> => ({
+    name: location.address,
+    address: location.address,
+    coordinates: {
+      lat: location.coordinates[1],
+      lng: location.coordinates[0]
     }
+  });
+
+  const handlePickupSelect = (location: Location) => {
+    setValue('pickupLocation', convertMapLocationToBookingLocation(location));
+  };
+
+  const handleDropoffSelect = (location: Location) => {
+    setValue('dropoffLocation', convertMapLocationToBookingLocation(location));
   };
 
   const onSubmit = async (data: BookingFormData) => {
     try {
       setIsLoading(true);
       setError(null);
+
+      const { pickupLocation, dropoffLocation } = data;
 
       if (!pickupLocation || !dropoffLocation) {
         setError('Please select valid pickup and drop-off locations');
@@ -74,30 +86,19 @@ const ManualForm: React.FC = () => {
 
       // Calculate estimated price based on straight-line distance
       const distance = calculateDistance(
-        [pickupLocation.coordinates[0], pickupLocation.coordinates[1]],
-        [dropoffLocation.coordinates[0], dropoffLocation.coordinates[1]]
+        [pickupLocation.coordinates.lng, pickupLocation.coordinates.lat],
+        [dropoffLocation.coordinates.lng, dropoffLocation.coordinates.lat]
       );
       const price = estimatePrice(distance * 1000); // Convert km to meters
 
       const booking: Booking = {
+        vehicleType: 'Standard',
+        additionalServices: [],
+        estimatedPrice: price,
         id: generateUUID(),
         userId: user?.id || '',
-        pickupLocation: {
-          ...pickupLocation,
-          name: pickupLocation.address,
-          coordinates: {
-            lat: pickupLocation.coordinates[1],
-            lng: pickupLocation.coordinates[0]
-          }
-        },
-        dropoffLocation: {
-          ...dropoffLocation,
-          name: dropoffLocation.address,
-          coordinates: {
-            lat: dropoffLocation.coordinates[1],
-            lng: dropoffLocation.coordinates[0]
-          }
-        },
+        pickupLocation: pickupLocation,
+        dropoffLocation: dropoffLocation,
         route: null,
         date: data.date,
         time: data.time,
@@ -141,7 +142,7 @@ const ManualForm: React.FC = () => {
         <LocationSearch
           type="pickup"
           value=""
-          onSelect={handleLocationSelect}
+          onSelect={handlePickupSelect}
           placeholder="Enter pickup location"
           className="w-full"
         />
@@ -152,8 +153,8 @@ const ManualForm: React.FC = () => {
         <LocationSearch
           type="dropoff"
           value=""
-          onSelect={handleLocationSelect}
-          placeholder="Enter drop-off location"
+          onSelect={handleDropoffSelect}
+          placeholder="Enter dropoff location"
           className="w-full"
         />
         {errors.dropoffLocation && (

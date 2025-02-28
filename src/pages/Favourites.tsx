@@ -231,7 +231,7 @@ const Favourites: React.FC = () => {
                   transition={{ delay: index * 0.1 }}
                   className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-primary/20"
                 >
-                  <div className="text-4xl mb-3">{location.type === 'home' ? '🏠' : location.type === 'work' ? '💼' : '💪'}</div>
+                  <div className="text-4xl mb-3">{location.name === 'Home' ? '🏠' : location.name === 'Office' ? '💼' : '💪'}</div>
                   <h3 className="text-lg font-semibold text-gray-900">{location.name}</h3>
                   <p className="text-gray-600 text-sm mt-2">{location.address}</p>
                   <div className="mt-4 pt-4 border-t border-gray-100">

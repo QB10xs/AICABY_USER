@@ -26,12 +26,14 @@ interface BookingState {
   bookingHistory: Booking[];
   isLoading: boolean;
   error: string | null;
+  bookingMode: 'ai' | 'manual';
   // Actions
   setCurrentBooking: (booking: Booking | null) => void;
   addToHistory: (booking: Booking) => void;
   updateBookingStatus: (bookingId: string, status: Booking['status']) => void;
   clearCurrentBooking: () => void;
   clearError: () => void;
+  setBookingMode: (mode: 'ai' | 'manual') => void;
 }
 
 export const useBookingStore = create<BookingState>()(
@@ -41,6 +43,9 @@ export const useBookingStore = create<BookingState>()(
       bookingHistory: [],
       isLoading: false,
       error: null,
+      bookingMode: 'ai',
+
+      setBookingMode: (mode) => set({ bookingMode: mode }),
 
       setCurrentBooking: (booking) => 
         set({ currentBooking: booking }),

@@ -13,6 +13,9 @@ export interface Booking {
   notes?: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   price: number;
+  vehicleType: string;
+  additionalServices: string[];
+  estimatedPrice?: number;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Car } from 'lucide-react';
+import { Car, ArrowRight } from 'lucide-react';
 
 const Landing: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background-light">
       {/* Animated Background Pattern */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(245,158,11,0.1)_1px,transparent_1px)] bg-[length:40px_40px]" />
@@ -17,18 +17,18 @@ const Landing: React.FC = () => {
           <div className="bg-yellow-500 p-2 rounded-xl">
             <Car className="w-6 h-6 text-white" />
           </div>
-          <span className="text-zinc-900 text-xl font-bold">AI CABY</span>
+          <span className="text-text-light text-xl font-bold">AI CABY</span>
         </div>
         <div className="flex items-center space-x-4">
           <Link 
-            to="/signin" 
-            className="px-4 py-2 text-zinc-900 hover:text-yellow-600 transition-colors"
+            to="/driver" 
+            className="px-4 py-2 text-text-light hover:text-primary transition-colors flex items-center gap-2"
           >
-            Sign In
+            For Drivers <ArrowRight className="w-4 h-4" />
           </Link>
           <Link 
             to="/signup" 
-            className="px-4 py-2 bg-yellow-500 text-white rounded-xl hover:bg-yellow-600 transition-colors shadow-lg hover:shadow-xl"
+            className="px-4 py-2 bg-primary text-white rounded-xl hover:bg-accent-yellow-dark transition-colors shadow-lg hover:shadow-xl"
           >
             Get Started
           </Link>
@@ -45,26 +45,26 @@ const Landing: React.FC = () => {
             transition={{ duration: 0.8 }}
             className="space-y-8"
           >
-            <h1 className="text-5xl lg:text-7xl font-bold text-zinc-900">
+            <h1 className="text-5xl lg:text-7xl font-bold text-text-light">
               Your AI-Powered
               <span className="text-yellow-500 block mt-2">Taxi Experience</span>
             </h1>
-            <p className="text-lg text-zinc-600 max-w-lg">
+            <p className="text-lg text-text-secondary-light max-w-lg">
               Experience the future of transportation with AI CABY. Smart bookings, 
               real-time tracking, and personalized service - all through natural conversation.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
                 to="/signup"
-                className="px-8 py-4 bg-yellow-500 text-white rounded-xl hover:bg-yellow-600 
+                className="px-8 py-4 bg-primary text-white rounded-xl hover:bg-accent-yellow-dark 
                          transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-xl"
               >
                 Start Your Journey
               </Link>
               <Link
                 to="/about"
-                className="px-8 py-4 border-2 border-yellow-500 text-yellow-500 rounded-xl 
-                         hover:bg-yellow-500 hover:text-white transition-all transform 
+                className="px-8 py-4 border-2 border-primary text-primary rounded-xl 
+                         hover:bg-primary hover:text-white transition-all transform 
                          hover:-translate-y-1"
               >
                 Learn More
@@ -80,8 +80,8 @@ const Landing: React.FC = () => {
                 { title: 'Secure', desc: 'End-to-end encryption' },
               ].map((feature) => (
                 <div key={feature.title} className="space-y-2">
-                  <h3 className="text-lg font-semibold text-zinc-900">{feature.title}</h3>
-                  <p className="text-zinc-600">{feature.desc}</p>
+                  <h3 className="text-lg font-semibold text-text-light">{feature.title}</h3>
+                  <p className="text-text-secondary-light">{feature.desc}</p>
                 </div>
               ))}
             </div>

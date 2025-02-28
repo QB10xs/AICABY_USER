@@ -9,4 +9,6 @@ export interface Location {
   address: string;
   coordinates: Coordinates;
   type?: 'home' | 'work' | 'favorite' | 'other';
+  lastVisited?: Date;
+  frequency?: number;
 } 

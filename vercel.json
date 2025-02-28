@@ -13,16 +13,10 @@
       "headers": { "cache-control": "public, max-age=0, must-revalidate" }
     },
     {
-      "src": "/(.+)",
-      "headers": { "cache-control": "public, max-age=0, must-revalidate" }
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
-  "env": {
-    "VITE_SUPABASE_URL": "@supabase_url",
-    "VITE_SUPABASE_ANON_KEY": "@supabase_anon_key",
-    "VITE_DEEPSEEK_API_KEY": "@deepseek_api_key",
-    "VITE_MAPBOX_ACCESS_TOKEN": "@mapbox_access_token"
-  },
   "github": {
     "enabled": true,
     "silent": true

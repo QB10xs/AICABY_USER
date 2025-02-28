@@ -70,7 +70,10 @@ const AIChat: React.FC = () => {
           dropoffLocation: {
             ...booking.dropoffLocation,
             name: booking.dropoffLocation.address
-          }
+          },
+          vehicleType: booking.carCategory || 'Standard',
+          additionalServices: [],
+          estimatedPrice: booking.price
         })).slice(0, 5)
       });
 

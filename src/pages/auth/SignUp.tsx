@@ -5,7 +5,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from '@/stores/authStore';
 import Input from '@/components/shared/Input';
+import BackButton from '@/components/shared/BackButton';
 import Notification from '@/components/shared/Notification';
+import { Car, ExternalLink } from 'lucide-react';
 
 // Validation schema
 const signUpSchema = z.object({
@@ -51,7 +53,7 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 px-4 transition-colors">
       {showVerificationNotice && (
         <Notification
           type="info"
@@ -61,16 +63,33 @@ const SignUp: React.FC = () => {
         />
       )}
 
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-        {/* Logo */}
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-accent">AI CABY</h2>
-          <p className="mt-2 text-gray-600">Create your account</p>
+      <div className="max-w-md w-full space-y-8 bg-white dark:bg-zinc-800 p-8 rounded-xl shadow-lg dark:shadow-zinc-900/50 border border-zinc-200 dark:border-zinc-700">
+        {/* Back Button and Logo */}
+        <div>
+          <div className="flex items-center justify-between mb-8">
+            <BackButton />
+            <div className="bg-primary p-2 rounded-xl inline-flex">
+              <Car className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <h2 className="text-3xl font-bold text-zinc-900 dark:text-white text-center">Get Started!</h2>
+          <p className="mt-2 text-zinc-600 dark:text-zinc-400 text-center">Create your account to begin.</p>
+          
+          {/* Additional Links */}
+          <div className="mt-4 flex flex-col items-center space-y-3">
+            <Link 
+              to="/about" 
+              className="inline-flex items-center text-sm text-zinc-600 dark:text-zinc-400 hover:text-primary dark:hover:text-primary transition-colors"
+            >
+              <ExternalLink className="w-4 h-4 mr-1" />
+              Learn more about AI CABY
+            </Link>
+          </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 text-red-500 p-4 rounded-lg text-sm">
+          <div className="bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 p-4 rounded-lg text-sm">
             {error}
           </div>
         )}
@@ -104,34 +123,28 @@ const SignUp: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className={`
-              w-full py-3 px-4 rounded-lg text-white font-medium
-              ${isLoading
-                ? 'bg-primary/50 cursor-not-allowed'
-                : 'bg-primary hover:bg-primary/90'
-              }
-            `}
+            className="w-full bg-primary text-black py-3 px-6 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
         {/* Sign In Link */}
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-zinc-600 dark:text-zinc-400">
           Already have an account?{' '}
-          <Link to="/auth/signin" className="text-primary hover:text-primary/80 font-medium">
+          <Link to="/signin" className="text-primary hover:text-primary/90 hover:underline transition-colors">
             Sign in
           </Link>
         </p>
 
         {/* Terms */}
-        <p className="text-center text-xs text-gray-500">
+        <p className="text-center text-xs text-zinc-500 dark:text-zinc-400 mt-4">
           By signing up, you agree to our{' '}
-          <Link to="/terms" className="text-primary hover:text-primary/80">
+          <Link to="/driver/docs?tab=mediation" className="text-primary hover:text-primary/90 hover:underline transition-colors">
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link to="/privacy" className="text-primary hover:text-primary/80">
+          <Link to="/driver/docs?tab=guidelines" className="text-primary hover:text-primary/90 hover:underline transition-colors">
             Privacy Policy
           </Link>
         </p>

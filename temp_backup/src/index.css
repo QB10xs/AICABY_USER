@@ -1,0 +1,192 @@
+@import 'mapbox-gl/dist/mapbox-gl.css';
+@import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+/* Glassmorphism Effects */
+.glass-card {
+  background: rgba(42, 42, 42, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(247, 201, 72, 0.2);
+  box-shadow: 0 8px 32px rgba(247, 201, 72, 0.1);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(247, 201, 72, 0.3);
+  box-shadow: 0 12px 40px rgba(247, 201, 72, 0.15);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(247, 201, 72, 0.3);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(247, 201, 72, 0.5);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Message Animations */
+.message-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.message-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.message-exit {
+  opacity: 1;
+}
+
+.message-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+/* Map Styles */
+.mapboxgl-map {
+  @apply rounded-lg;
+}
+
+.mapboxgl-ctrl-top-right {
+  @apply mt-4 mr-4;
+}
+
+.mapboxgl-ctrl-group {
+  @apply !bg-night-black/80 !border-taxi-yellow/20;
+}
+
+.mapboxgl-ctrl-group button {
+  @apply !bg-transparent !border-none;
+}
+
+.mapboxgl-ctrl-group button:hover {
+  @apply !bg-taxi-yellow/20;
+}
+
+.mapboxgl-ctrl-icon {
+  @apply !text-white;
+}
+
+/* Location Markers */
+.marker {
+  @apply cursor-pointer transition-transform duration-200;
+}
+
+.marker:hover {
+  transform: scale(1.1);
+}
+
+.pickup-marker {
+  @apply animate-bounce;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
+}
+
+.dropoff-marker {
+  @apply animate-bounce;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
+  animation-delay: 0.5s;
+}
+
+/* Glass Input */
+.glass-input {
+  @apply bg-white/5 border border-white/10 rounded-lg py-3 px-4 text-white placeholder-gray-400 
+         focus:outline-none focus:border-taxi-yellow/30 transition-colors;
+}
