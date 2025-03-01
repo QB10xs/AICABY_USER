@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#F7C948" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AICABY" />
+    <meta name="description" content="AI-Powered Cab Booking Service" />
+    
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Splash Screen Images -->
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-2048-2732.jpg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-1668-2388.jpg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-1536-2048.jpg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-1125-2436.jpg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+    <link rel="apple-touch-startup-image" href="/splash/apple-splash-828-1792.jpg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+    
+    <title>AICABY - AI-Powered Cab Booking</title>
+    <script type="module" crossorigin src="/assets/index-BnIvMOlq.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-DQy62pII.js">
+    <link rel="modulepreload" crossorigin href="/assets/auth-vendor-B4VC9ecp.js">
+    <link rel="modulepreload" crossorigin href="/assets/state-vendor-BATXlTbd.js">
+    <link rel="modulepreload" crossorigin href="/assets/map-vendor--SRgJ61u.js">
+    <link rel="modulepreload" crossorigin href="/assets/date-vendor-CBpsKyOP.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-3e1G-ll4.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Register Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful');
+              
+              // Request notification permission
+              if ('Notification' in window) {
+                Notification.requestPermission();
+              }
+            })
+            .catch(error => {
+              console.error('ServiceWorker registration failed:', error);
+            });
+        });
+      }
+
+      // Add to Home Screen prompt handler
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show custom install prompt if needed
+        const installButton = document.createElement('button');
+        installButton.style.display = 'none';
+        installButton.addEventListener('click', async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to install prompt: ${outcome}`);
+            deferredPrompt = null;
+          }
+        });
+        document.body.appendChild(installButton);
+      });
+
+      // Handle offline/online events
+      window.addEventListener('online', () => {
+        document.body.classList.remove('offline');
+      });
+      
+      window.addEventListener('offline', () => {
+        document.body.classList.add('offline');
+      });
+    </script>
+  </body>
+</html>

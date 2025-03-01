@@ -1,4 +1,5 @@
 import { TrainingData, TrainingExample } from '@/types/training';
+import { supabaseTrainingService } from './supabaseTrainingService';
 
 class TrainingService {
   private trainingData: TrainingData = {
@@ -10,40 +11,71 @@ class TrainingService {
     },
   };
 
-  // Load training data from a JSON file or API
-  async loadTrainingData(data: TrainingData) {
-    this.trainingData = {
-      ...data,
-      metadata: {
-        ...data.metadata,
-        lastUpdated: new Date().toISOString(),
-      },
-    };
-    console.log(`Loaded ${this.trainingData.examples.length} training examples`);
+  // Load training data from Supabase
+  async loadTrainingData(initialData?: TrainingData) {
+    try {
+      if (initialData) {
+        console.log('Initial data provided, attempting to upload to Supabase...');
+        try {
+          // Try to upload initial data to Supabase
+          await supabaseTrainingService.bulkInsertExamples(initialData.examples);
+          console.log('Successfully uploaded initial data to Supabase');
+        } catch (uploadError) {
+          console.error('Error uploading initial data to Supabase:', uploadError);
+        }
+      }
+
+      // Always try to fetch from Supabase
+      console.log('Fetching data from Supabase...');
+      this.trainingData = await supabaseTrainingService.fetchTrainingData();
+      console.log(`Loaded ${this.trainingData.examples.length} training examples from Supabase`);
+    } catch (error) {
+      console.error('Error loading training data:', error);
+      if (initialData) {
+        console.log('Using provided initial data as fallback');
+        this.trainingData = {
+          ...initialData,
+          metadata: {
+            ...initialData.metadata,
+            lastUpdated: new Date().toISOString(),
+          },
+        };
+      }
+      throw error;
+    }
   }
 
-  // Find the most relevant example for a given input
-  findMatchingExample(input: string): TrainingExample | null {
-    const normalizedInput = input.toLowerCase().trim();
-    
-    // Simple matching algorithm - can be improved with more sophisticated matching
-    const match = this.trainingData.examples.find(example => {
-      const exampleInput = example.userInput.toLowerCase();
-      return (
-        normalizedInput.includes(exampleInput) ||
-        exampleInput.includes(normalizedInput) ||
-        this.calculateSimilarity(normalizedInput, exampleInput) > 0.7
-      );
-    });
+  // Find a matching example based on user input
+  findMatchingExample(userInput: string): TrainingExample | null {
+    const normalizedInput = userInput.toLowerCase().trim();
+    let bestMatch: TrainingExample | null = null;
+    let highestSimilarity = 0;
 
-    return match || null;
+    for (const example of this.trainingData.examples) {
+      const similarity = this.calculateSimilarity(
+        normalizedInput,
+        example.userInput.toLowerCase()
+      );
+
+      if (similarity > highestSimilarity && similarity > 0.5) {
+        highestSimilarity = similarity;
+        bestMatch = example;
+      }
+    }
+
+    return bestMatch;
   }
 
   // Add a new training example
-  addExample(example: TrainingExample) {
-    this.trainingData.examples.push(example);
-    this.trainingData.metadata.totalExamples = this.trainingData.examples.length;
-    this.trainingData.metadata.lastUpdated = new Date().toISOString();
+  async addExample(example: TrainingExample) {
+    try {
+      await supabaseTrainingService.addTrainingExample(example);
+      // Refresh local data
+      await this.loadTrainingData();
+    } catch (error) {
+      console.error('Error adding training example:', error);
+      throw error;
+    }
   }
 
   // Get all training examples
@@ -51,7 +83,7 @@ class TrainingService {
     return this.trainingData.examples;
   }
 
-  // Calculate similarity between two strings (simple Jaccard similarity)
+  // Calculate Jaccard similarity between two strings
   private calculateSimilarity(str1: string, str2: string): number {
     const set1 = new Set(str1.split(' '));
     const set2 = new Set(str2.split(' '));
@@ -63,4 +95,5 @@ class TrainingService {
   }
 }
 
+// Export a singleton instance
 export const trainingService = new TrainingService(); 

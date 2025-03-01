@@ -7,6 +7,7 @@ import SignUp from './pages/auth/SignUp';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import { Documentation } from './pages/docs';
 import DriverLanding from './pages/DriverLanding';
+import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Support from './pages/Support';
@@ -15,21 +16,28 @@ import TrainingData from './pages/admin/TrainingData';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorBoundary from './components/shared/ErrorBoundary';
 import { trainingService } from './services/trainingService';
-import trainingData from './data/training.json';
 import './index.css';
 import Favourites from './pages/Favourites';
 import RideHistory from './pages/RideHistory';
 import ActiveRides from './pages/ActiveRides';
 
-// Initialize training service
-trainingService.loadTrainingData(trainingData).catch(console.error);
+// Initialize training service by loading from Supabase
+trainingService.loadTrainingData()
+  .then(() => {
+    console.log('Training data loaded from Supabase successfully');
+  })
+  .catch((error) => {
+    console.error('Error loading training data from Supabase:', error);
+  });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
       <Router>
         <Routes>
-          <Route path="/" element={<App />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/welcome" element={<App />} />
+          <Route path="/landing" element={<Landing />} />
           <Route path="/driver">
             <Route index element={<DriverLanding />} />
             <Route path="signup" element={<SignUp />} />
@@ -43,14 +51,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
           <Route
             path="/profile"
             element={

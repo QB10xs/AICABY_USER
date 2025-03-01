@@ -3,7 +3,10 @@ import { trainingService } from '@/services/trainingService';
 import { TrainingExample } from '@/types/training';
 
 const TrainingData: React.FC = () => {
+  console.log('TrainingData component rendering');
   const [examples, setExamples] = useState<TrainingExample[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [newExample, setNewExample] = useState<Partial<TrainingExample>>({
     userInput: '',
     aiResponse: '',
@@ -13,21 +16,53 @@ const TrainingData: React.FC = () => {
   });
 
   useEffect(() => {
-    setExamples(trainingService.getExamples());
+    console.log('TrainingData useEffect running');
+    const loadData = async () => {
+      try {
+        console.log('Starting to load training data');
+        setLoading(true);
+        setError(null);
+        
+        // Force a fresh load from Supabase
+        console.log('Calling trainingService.loadTrainingData()');
+        await trainingService.loadTrainingData();
+        
+        console.log('Getting examples from training service');
+        const loadedExamples = trainingService.getExamples();
+        console.log('Loaded examples:', loadedExamples);
+        
+        setExamples(loadedExamples);
+      } catch (err) {
+        console.error('Error in loadData:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load training data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
-  const handleAddExample = () => {
+  const handleAddExample = async () => {
     if (!newExample.userInput || !newExample.aiResponse) return;
 
-    trainingService.addExample(newExample as TrainingExample);
-    setExamples(trainingService.getExamples());
-    setNewExample({
-      userInput: '',
-      aiResponse: '',
-      context: {
-        intent: '',
-      },
-    });
+    try {
+      setLoading(true);
+      await trainingService.addExample(newExample as TrainingExample);
+      setExamples(trainingService.getExamples());
+      setNewExample({
+        userInput: '',
+        aiResponse: '',
+        context: {
+          intent: '',
+        },
+      });
+    } catch (err) {
+      console.error('Error adding example:', err);
+      alert('Failed to add example. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,17 +73,41 @@ const TrainingData: React.FC = () => {
 
     reader.onload = async (event) => {
       try {
+        setLoading(true);
         const data = JSON.parse(event.target?.result as string);
         await trainingService.loadTrainingData(data);
         setExamples(trainingService.getExamples());
       } catch (error) {
         console.error('Error loading training data:', error);
         alert('Error loading training data. Please check the file format.');
+      } finally {
+        setLoading(false);
       }
     };
 
     reader.readAsText(file);
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="flex items-center justify-center min-h-[200px]">
+          <div className="text-lg">Loading training data...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          <h2 className="text-lg font-semibold mb-2">Error Loading Data</h2>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -113,35 +172,43 @@ const TrainingData: React.FC = () => {
 
           <button
             onClick={handleAddExample}
-            disabled={!newExample.userInput || !newExample.aiResponse}
+            disabled={!newExample.userInput || !newExample.aiResponse || loading}
             className={`
               w-full py-2 rounded-lg font-medium
-              ${(!newExample.userInput || !newExample.aiResponse)
+              ${(!newExample.userInput || !newExample.aiResponse || loading)
                 ? 'bg-gray-300 cursor-not-allowed'
                 : 'bg-primary text-accent hover:bg-primary/90'
               }
             `}
           >
-            Add Example
+            {loading ? 'Adding...' : 'Add Example'}
           </button>
         </div>
       </div>
 
       {/* Examples List */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Training Examples</h2>
-        <div className="space-y-4">
-          {examples.map((example, index) => (
-            <div key={index} className="p-4 border rounded-lg">
-              <div className="font-medium text-gray-700">Input:</div>
-              <div className="mb-2">{example.userInput}</div>
-              <div className="font-medium text-gray-700">Response:</div>
-              <div className="mb-2">{example.aiResponse}</div>
-              <div className="font-medium text-gray-700">Intent:</div>
-              <div className="text-sm text-gray-600">{example.context?.intent}</div>
-            </div>
-          ))}
-        </div>
+        <h2 className="text-lg font-semibold mb-4">
+          Training Examples ({examples.length})
+        </h2>
+        {examples.length === 0 ? (
+          <div className="text-gray-500 text-center py-8">
+            No training examples yet. Add your first example above.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {examples.map((example, index) => (
+              <div key={index} className="p-4 border rounded-lg">
+                <div className="font-medium text-gray-700">Input:</div>
+                <div className="mb-2">{example.userInput}</div>
+                <div className="font-medium text-gray-700">Response:</div>
+                <div className="mb-2">{example.aiResponse}</div>
+                <div className="font-medium text-gray-700">Intent:</div>
+                <div className="text-sm text-gray-600">{example.context?.intent}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

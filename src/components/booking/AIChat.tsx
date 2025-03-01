@@ -7,6 +7,7 @@ import Message from '@/components/chat/Message';
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import BookingConfirmation from './BookingConfirmation';
 import { generateUUID } from '@/utils/uuid';
+import { estimatePrice } from '@/utils/pricing';
 
 const AIChat: React.FC = () => {
   const {
@@ -16,6 +17,7 @@ const AIChat: React.FC = () => {
     addMessage,
     setProcessing,
     setError,
+    clearMessages
   } = useAIStore();
 
   const { user } = useAuthStore();
@@ -27,6 +29,25 @@ const AIChat: React.FC = () => {
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  
+  // Add state to track conversation context
+  const [conversationContext, setConversationContext] = useState({
+    lastQuestion: undefined as string | undefined,
+    pendingLocation: undefined as { address: string; type: 'pickup' | 'dropoff' | undefined } | undefined
+  });
+
+  // Reset conversation context when component mounts
+  useEffect(() => {
+    // Clear any previous messages and reset context
+    clearMessages();
+    setConversationContext({
+      lastQuestion: undefined,
+      pendingLocation: undefined
+    });
+    
+    // Add initial greeting
+    addMessage('assistant', "Hello! I'm your AICABY assistant. How can I help you with your ride today?");
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -59,60 +80,64 @@ const AIChat: React.FC = () => {
     setError(null);
 
     try {
-      // Get AI response
+      // Get AI response with the current conversation context
       const response = await generateAIResponse(userMessage, {
-        previousBookings: bookingHistory.map(booking => ({
+        previousBookings: bookingHistory.slice(0, 5).map(booking => ({
           ...booking,
-          pickupLocation: {
-            ...booking.pickupLocation,
-            name: booking.pickupLocation.address
-          },
-          dropoffLocation: {
-            ...booking.dropoffLocation,
-            name: booking.dropoffLocation.address
-          },
-          vehicleType: booking.carCategory || 'Standard',
-          additionalServices: [],
-          estimatedPrice: booking.price
-        })).slice(0, 5)
+          createdAt: new Date(booking.createdAt).toISOString(),
+          updatedAt: new Date(booking.updatedAt).toISOString(),
+          date: new Date(booking.date).toISOString()
+        })),
+        lastQuestion: conversationContext.lastQuestion,
+        pendingLocation: conversationContext.pendingLocation
       });
 
       addMessage('assistant', response.content);
+      
+      // Update conversation context with new values from the response
+      setConversationContext(prevContext => ({
+        lastQuestion: response.lastQuestion || prevContext.lastQuestion,
+        pendingLocation: response.pendingLocation || prevContext.pendingLocation
+      }));
+
+      console.log('Updated context:', {
+        lastQuestion: response.lastQuestion,
+        pendingLocation: response.pendingLocation
+      });
 
       if (response.booking) {
-        const { pickupLocation, dropoffLocation, date, time, passengers } = response.booking;
+        const { pickupLocation, dropoffLocation } = response.booking;
         
-        if (pickupLocation && dropoffLocation && user && date && time) {
+        if (pickupLocation && dropoffLocation && user) {
           const newBooking = {
             id: generateUUID(),
-            userId: user.id,
+            userId: user?.id || '',
             pickupLocation: {
-              ...pickupLocation,
-              coordinates: {
-                lat: pickupLocation.coordinates.lat,
-                lng: pickupLocation.coordinates.lng
-              }
+              address: pickupLocation.address,
+              coordinates: pickupLocation.coordinates
             },
             dropoffLocation: {
-              ...dropoffLocation,
-              coordinates: {
-                lat: dropoffLocation.coordinates.lat,
-                lng: dropoffLocation.coordinates.lng
-              }
+              address: dropoffLocation.address,
+              coordinates: dropoffLocation.coordinates
             },
             route: null,
-            date,
-            time,
-            passengers: passengers || 1,
-            notes: '',
             status: 'pending' as const,
-            price: 0,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            date: new Date().toISOString(),
+            time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+            passengers: 1,
+            price: estimatePrice(15000),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           };
 
           setCurrentBooking(newBooking);
           setShowConfirmation(true);
+          
+          // Reset conversation context after booking is created
+          setConversationContext({
+            lastQuestion: undefined,
+            pendingLocation: undefined
+          });
         }
       }
     } catch (err) {
@@ -151,7 +176,7 @@ Your driver will contact you shortly before pickup. Thank you for choosing AI CA
       const confirmedBooking = {
         ...currentBooking,
         status: 'confirmed' as const,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString()
       };
       addToHistory(confirmedBooking);
       
